@@ -7,10 +7,10 @@ class UPSClientTestCase(unittest.TestCase):
 
     def test_rate_service(self):
         credentials = {
-            'username': 'energiahoje',
-            'password': 'Saude2011',
-            'access_license': '1C85473DF5703150',
-            'shipper_number': 'energiahoje'
+            'username': '',
+            'password': '',
+            'access_license': '',
+            'shipper_number': ''
         }
 
         shipper = Address(name='shipper address name', city='rio de janeiro',

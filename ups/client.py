@@ -168,7 +168,7 @@ class UPSClient(object):
     def rate(self, packages, shipper, recipient, packaging_type):
         client = self._get_client('RateWS.wsdl')
         self._add_security_header(client)
-        #client.set_options(location='https://wwwcie.ups.com/webservices/Rate')
+        client.set_options(location='https://onlinetools.ups.com/webservices/Rate')
 
         request = client.factory.create('ns0:RequestType')
         request.RequestOption = 'Shop'
