@@ -11,7 +11,7 @@ setup(
     author_email='marcel.nicolay@gmail.com',
     url='http://github.com/marcelnicolay/python-ups',
     license='OSI',
-    install_requires=open("requirements.txt").read().split("\n"),
     packages=['ups'],
+    install_requires=['suds>=0.4'],
     test_suite="nose.collector"
 )
