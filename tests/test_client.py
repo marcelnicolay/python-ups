@@ -17,4 +17,3 @@ class UPSClientTestCase(unittest.TestCase):
 
         ups = UPSClient(credentials)
         response = ups.rate(shipper=shipper, recipient=recipient)
-
