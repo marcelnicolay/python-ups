@@ -12,6 +12,7 @@ setup(
     url='http://github.com/marcelnicolay/python-ups',
     license='OSI',
     packages=['ups'],
+    package_data={'ups': ['wsdl/*']}
     install_requires=['suds>=0.4'],
     test_suite="nose.collector"
 )
