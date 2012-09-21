@@ -61,7 +61,7 @@ class UPSClient(object):
         self.debug = debug
 
     def _add_security_header(self, client):
-        security_ns = ('security', 'http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0')
+        security_ns = ('upss', 'http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0')
         security = Element('UPSSecurity', ns=security_ns)
 
         username_token = Element('UsernameToken', ns=security_ns)
