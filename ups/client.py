@@ -3,10 +3,12 @@ import urllib
 import urlparse
 import os
 import suds
+import logging
 from suds.client import Client
 from suds.sax.element import Element
 from suds.plugin import MessagePlugin
 
+logger = logging.getLogger(__name__)
 
 SERVICES = [
     ('03', 'UPS Ground'),
@@ -180,11 +182,14 @@ class UPSClient(object):
         shipment.ShipmentRatingOptions.NegotiatedRatesIndicator = ''
 
         try:
-            self.reply = client.service.ProcessRate(request, CustomerClassification=classification, Shipment=shipment)
+            logger.debug(request)
+            response = client.service.ProcessRate(request, CustomerClassification=classification, Shipment=shipment)
+
+            logger.debug(response)
             service_lookup = dict(SERVICES)
 
             info = list()
-            for r in self.reply.RatedShipment:
+            for r in response.RatedShipment:
                 unknown_service = 'Unknown Service: {}'.format(r.Service.Code)
                 try:
                     cost = r.NegotiatedRateCharges.TotalCharge.MonetaryValue
@@ -197,7 +202,7 @@ class UPSClient(object):
                     'cost': cost
                 })
 
-            response = {'status': self.reply.Response.ResponseStatus.Description, 'info': info}
+            response = {'status': response.Response.ResponseStatus.Description, 'info': info}
             return response
         except suds.WebFault as e:
             raise UPSError(e.fault, e.document)
