@@ -1,4 +1,4 @@
 recursive-include ups *.py
-recursive-include ups/wsdl *.xsd *.wsdl
+include ups/wsdl
 include README.md
 include requirements.txt
