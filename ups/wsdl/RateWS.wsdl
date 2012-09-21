@@ -32,7 +32,7 @@
 	<wsdl:binding name="RateBinding" type="tns:RatePortType">
 		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
 		<wsdl:operation name="ProcessRate">
-			<soap:operation soapAction="http://onlinetools.ups.com/webservices/RateBinding/v1.1" style="document"/>
+			<soap:operation soapAction="http://www.ups.com/ups.app/webservices/RateBinding/v1.1" style="document"/>
 			<wsdl:input name="RateRequest">
 				<soap:body parts="Body" use="literal"/>
 				<soap:header message="tns:RateRequestMessage" part="UPSSecurity" use="literal">
