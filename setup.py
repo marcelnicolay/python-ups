@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='python-ups',
-    version='0.0.1',
+    version='0.0.2',
     description="UPS shipping interface",
     keywords=['ups', 'shipping'],
     author='Marcel Nicolay',
