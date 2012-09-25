@@ -156,8 +156,11 @@ class UPSClient(object):
         recipient_country = self._normalized_country_code(recipient_address.country)
         shipment.ShipTo.Address.CountryCode = recipient_country
 
-        shipment.Shipper.Address.StateProvinceCode = shipper_address.state
-        shipment.ShipTo.Address.StateProvinceCode = recipient_address.state
+        # Only add states if we're shipping to/from US, PR, or Ireland
+        if shipper_country in ( 'US', 'CA', 'IE' ):
+            shipment.Shipper.Address.StateProvinceCode = shipper_address.state
+        if recipient_country in ( 'US', 'CA', 'IE' ):
+            shipment.ShipTo.Address.StateProvinceCode = recipient_address.state
 
         if recipient_address.is_residence:
             shipment.ShipTo.Address.ResidentialAddressIndicator = ''
