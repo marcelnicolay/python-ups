@@ -56,10 +56,13 @@ class FixRequestNamespacePlug(MessagePlugin):
 
 class UPSClient(object):
 
-    def __init__(self, credentials, debug=True):
+    def __init__(self, credentials, weight_unit='KGS', dimension_unit='CM', currency_code='USD', debug=True):
         this_dir = os.path.dirname(os.path.realpath(__file__))
         self.wsdl_dir = os.path.join(this_dir, 'wsdl')
         self.credentials = credentials
+        self.weight_unit = weight_unit
+        self.dimension_unit = dimension_unit
+        self.currency_code = currency_code
         self.debug = debug
 
     def _add_security_header(self, client):
@@ -112,19 +115,19 @@ class UPSClient(object):
             elif hasattr(package, 'PackagingType'):
                 package.PackagingType.Code = box_shape
 
-            package.Dimensions.UnitOfMeasurement.Code = 'CM'
+            package.Dimensions.UnitOfMeasurement.Code = self.dimension_unit
             package.Dimensions.Length = p.length
             package.Dimensions.Width = p.width
             package.Dimensions.Height = p.height
 
-            package.PackageWeight.UnitOfMeasurement.Code = 'KGS'
+            package.PackageWeight.UnitOfMeasurement.Code = self.weight_unit
             package.PackageWeight.Weight = p.weight
 
             if can_add_delivery_confirmation and p.require_signature:
                 package.PackageServiceOptions.DeliveryConfirmation.DCISType = str(p.require_signature)
 
             if p.value:
-                package.PackageServiceOptions.DeclaredValue.CurrencyCode = 'USD'
+                package.PackageServiceOptions.DeclaredValue.CurrencyCode = self.currency_code
                 package.PackageServiceOptions.DeclaredValue.MonetaryValue = p.value
 
             if create_reference_number and p.reference:
@@ -172,6 +175,7 @@ class UPSClient(object):
         return shipment
 
     def rate(self, packages, shipper, recipient, packaging_type):
+
         client = self._get_client('RateWS.wsdl')
         self._add_security_header(client)
         client.set_options(location='https://onlinetools.ups.com/webservices/Rate')
