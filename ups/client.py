@@ -50,8 +50,8 @@ class UPSError(Exception):
 
 
 class FixRequestNamespacePlug(MessagePlugin):
-    def sending(self, context):
-        context.envelope = context.envelope.replace('ns1:Request>', 'ns0:Request>').replace('ns2:Request>', 'ns1:Request>')
+    def marshalled(self, context):
+        context.envelope.getChild('Body').getChild('RateRequest').getChild('Request').prefix = 'ns0'
 
 
 class UPSClient(object):
@@ -97,9 +97,9 @@ class UPSClient(object):
 
     def _get_client(self, wsdl):
         wsdl_url = self.wsdlURL(wsdl)
-        plugin = FixRequestNamespacePlug()
+
         # Setting prefixes=False does not help
-        return Client(wsdl_url, plugins=[plugin])
+        return Client(wsdl_url, plugins=[FixRequestNamespacePlug()])
 
     def _create_shipment(self, client, packages, shipper_address, recipient_address, box_shape, namespace='ns3', create_reference_number=True, can_add_delivery_confirmation=True):
         shipment = client.factory.create('{}:ShipmentType'.format(namespace))
@@ -112,12 +112,12 @@ class UPSClient(object):
             elif hasattr(package, 'PackagingType'):
                 package.PackagingType.Code = box_shape
 
-            package.Dimensions.UnitOfMeasurement.Code = 'IN'
+            package.Dimensions.UnitOfMeasurement.Code = 'CM'
             package.Dimensions.Length = p.length
             package.Dimensions.Width = p.width
             package.Dimensions.Height = p.height
 
-            package.PackageWeight.UnitOfMeasurement.Code = 'LBS'
+            package.PackageWeight.UnitOfMeasurement.Code = 'KGS'
             package.PackageWeight.Weight = p.weight
 
             if can_add_delivery_confirmation and p.require_signature:
@@ -156,14 +156,15 @@ class UPSClient(object):
         recipient_country = self._normalized_country_code(recipient_address.country)
         shipment.ShipTo.Address.CountryCode = recipient_country
 
-        # Only add states if we're shipping to/from US, PR, or Ireland
-        if shipper_country in ('US', 'CA', 'IE'):
-            shipment.Shipper.Address.StateProvinceCode = shipper_address.state
-        if recipient_country in ('US', 'CA', 'IE'):
-            shipment.ShipTo.Address.StateProvinceCode = recipient_address.state
+        shipment.Shipper.Address.StateProvinceCode = shipper_address.state
+        shipment.ShipTo.Address.StateProvinceCode = recipient_address.state
 
         if recipient_address.is_residence:
             shipment.ShipTo.Address.ResidentialAddressIndicator = ''
+
+        shipment.Service.Code = '08'
+        shipment.Service.Description = 'Service Code'
+        shipment.ShipmentServiceOptions = ''
 
         return shipment
 
@@ -176,16 +177,21 @@ class UPSClient(object):
         request.RequestOption = 'Shop'
 
         classification = client.factory.create('ns2:CodeDescriptionType')
-        classification.Code = '00'  # Get rates for the shipper account
+        classification.Code = '01'  # Get rates for the shipper account
+        classification.Description = 'Classification'  # Get rates for the shipper account
 
-        shipment = self._create_shipment(client, packages, shipper, recipient, packaging_type, namespace='ns2')
+        pickup = client.factory.create('ns2:PickupType')
+        pickup.Code = '01'
+        pickup.Description = 'Daily Pickup'
+
+        shipment = self._create_shipment(client, packages, shipper, recipient,
+            packaging_type, namespace='ns2')
         shipment.ShipmentRatingOptions.NegotiatedRatesIndicator = ''
 
         try:
-            logger.debug(request)
-            response = client.service.ProcessRate(request, CustomerClassification=classification, Shipment=shipment)
+            response = client.service.ProcessRate(Request=request, PickupType=pickup,
+                CustomerClassification=classification, Shipment=shipment)
 
-            logger.debug(response)
             service_lookup = dict(SERVICES)
 
             info = list()
