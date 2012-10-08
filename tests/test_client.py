@@ -28,5 +28,3 @@ class UPSClientTestCase(unittest.TestCase):
         ups = UPSClient(credentials)
         response = ups.rate(packages=packages, packaging_type='21',
             shipper=shipper, recipient=recipient)
-
-        import pdb;pdb.set_trace()

@@ -206,13 +206,17 @@ class UPSClient(object):
                 unknown_service = 'Unknown Service: {}'.format(r.Service.Code)
                 try:
                     cost = r.NegotiatedRateCharges.TotalCharge.MonetaryValue
+                    currency = r.NegotiatedRateCharges.TotalCharge.CurrencyCode
                 except AttributeError:
                     cost = r.TotalCharges.MonetaryValue
+                    currency = r.TotalCharges.CurrencyCode
+
                 info.append({
                     'service': service_lookup.get(r.Service.Code, unknown_service),
                     'package': '',
                     'delivery_day': '',
-                    'cost': cost
+                    'cost': cost,
+                    'currency': currency
                 })
 
             response = {'status': response.Response.ResponseStatus.Description, 'info': info}
